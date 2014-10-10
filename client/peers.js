@@ -19,7 +19,7 @@ tracker.start();
 
 tracker.on('peer', function (peer) {
     peers.push(peer)
-    UI.$peerCount.innerText = peers.length
+    console.log("peer arrived", peers.length, peer)
     peer.send({ type: "welcome", peer: module.exports.peerId })
     for (var hash in Library._torrents) {
         var torrent = Library._torrents[hash];
@@ -42,7 +42,7 @@ tracker.on('peer', function (peer) {
 
     function onClose () {
         peers.splice(peers.indexOf(peer), 1)
-        UI.$peerCount.innerText = peers.length
+        console.log("peer gone", peers.length, peer)
     }
     peer.on('close', onClose)
     peer.on('error', onClose)

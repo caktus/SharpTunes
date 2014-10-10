@@ -14,7 +14,6 @@ var Playlist = module.exports = {
     },
 
     redrawPlaylist: function() {
-        console.log(playlist)
         $playlist.innerText = ""
 
         playlist.forEach(function(entry, i) {

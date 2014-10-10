@@ -49,7 +49,6 @@ function onShareTrack(msg) {
 }
 
 function onTorrent(torrent) {
-    console.log('SHARE', torrent.infoHash)
     if (torrent.infoHash in Library._torrents) {
         Peers.broadcast({type: "sharetrack", infoHash: torrent.infoHash})
     } else {
@@ -58,11 +57,7 @@ function onTorrent(torrent) {
 
         torrent.swarm.on('download', function () {
             var progress = (100 * torrent.downloaded / torrent.parsedTorrent.length).toFixed(1)
-            // logReplace('progress: ' + progress + '% -- download speed: ' + prettysize(torrent.swarm.downloadSpeed()) + '/s<br>')
-        })
-
-        torrent.swarm.on('upload', function () {
-            // logReplace('upload speed:' + prettysize(client.uploadSpeed()) + '/s<br>')
+            console.log(torrent.infoHash, progress)
         })
 
         torrent.files.forEach(function (file) {

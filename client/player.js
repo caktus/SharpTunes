@@ -6,32 +6,9 @@ var Playlist = require('./playlist')
 
 var $player = document.querySelector('audio')
 
-$player.addEventListener('play', function() {
-    Peers.broadcast({type: 'player', action: 'play'})
-})
-$player.addEventListener('pause', function() {
-    Peers.broadcast({type: 'player', action: 'pause'})
-})
 $player.addEventListener('ended', function() {
     Peers.broadcast({type: 'player', action: 'ended'})
     Player.emit('trackend')
-})
-
-Peers.on("player", function(msg) {
-    switch (msg.action) {
-        case "play":
-            Player.play()
-            break;
-        case "pause":
-            Player.pause()
-            break;
-        case "change":
-            console.log("change", msg)
-            break;
-        default:
-            console.error("unknown player event: " + msg.action)
-            break;
-    }
 })
 
 var Player = module.exports = {
