@@ -5,6 +5,7 @@ var hat = require('hat')
 var Playlist = require('./playlist')
 var Player = require('./player')
 var Library = require('./library')
+var UI = require('./ui')
 
 // WebTorrent
 
@@ -18,7 +19,8 @@ tracker.start();
 
 tracker.on('peer', function (peer) {
     peers.push(peer)
-    peer.send({ type: "welcome" })
+    UI.$peerCount.innerText = peers.length
+    peer.send({ type: "welcome", peer: module.exports.peerId })
     for (var hash in Library._torrents) {
         var torrent = Library._torrents[hash];
         var files = [];
@@ -40,6 +42,7 @@ tracker.on('peer', function (peer) {
 
     function onClose () {
         peers.splice(peers.indexOf(peer), 1)
+        UI.$peerCount.innerText = peers.length
     }
 
     peer.on('close', onClose)

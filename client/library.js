@@ -1,4 +1,5 @@
 var Client = require('bittorrent-client')
+var events = require('events')
 
 var dragDrop = require('drag-drop/buffer')
 // TODO: this seems out of place
@@ -30,9 +31,17 @@ var Library = module.exports = {
         this._client.seed(allFiles, onTorrent)
     },
 
+    on: function() {
+        this._ee.on.apply(this, arguments)
+    },
+    emit: function() {
+        this._ee.emit.apply(this, arguments)
+    },
+
     _client: null,
     _tracks: {},
     _torrents: [],
+    _ee: new events.EventEmitter(),
 }
 
 function onShareTrack(msg) {
@@ -57,10 +66,7 @@ function onTorrent(torrent) {
         })
 
         torrent.files.forEach(function (file) {
-            Playlist.addTrack({
-                title: file.name,
-                file: file,
-            })
+            Library.emit('newtrack', file)
         })
     }
 }
