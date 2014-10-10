@@ -7,21 +7,32 @@ var position = 0
 
 module.exports.addTrack = function(opt) {
     playlist.push(opt)
+    module.exports.alphabetizePlaylist()
     var i = playlist.length - 1
 
-    var $li = document.createElement('li')
-    $li.innerText = opt.title
-    $playlist.appendChild($li)
+    $playlist.innerText = ""
 
-    var $a = document.createElement('a')
-    $a.innerText = " [play]"
-    $a.addEventListener('click', function(){
-        Player.setAudio(opt.file);
-        setTimeout(function(){
-            module.exports.play(i);
-        }, 500)
+    playlist.forEach(function(entry) {
+        var $li = document.createElement('li')
+        $li.innerText = entry.title
+        $playlist.appendChild($li)
+
+        var $a = document.createElement('a')
+        $a.innerText = " [play]"
+        $a.addEventListener('click', function(){
+            Player.setAudio(entry.file);
+            setTimeout(function(){
+                module.exports.play(module.exports.getFilePosition(entry.file.name));
+            }, 500)
+        })
+        $li.appendChild($a)
     })
-    $li.appendChild($a)
+}
+
+module.exports.alphabetizePlaylist = function() {
+    playlist.sort(function(a, b) {
+        return a.file.name > b.file.name;
+    })
 }
 
 module.exports.next = function() {
