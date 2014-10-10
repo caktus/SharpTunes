@@ -1,0 +1,52 @@
+{
+  "name": "SharpTunes",
+  "description": "Collaborative music player",
+  "version": "0.1.0",
+  "author": "Calvin Spealman <ironfroggy@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/caktusgroup/sharptunes/issues"
+  },
+  "dependencies": {
+    "compression": "^1.0.9",
+    "concat-stream": "^1.4.6",
+    "debug": "^2.0.0",
+    "drag-drop": "^1.0.2",
+    "express": "^4.8.5",
+    "jade": "^1.5.0",
+    "posix": "^1.0.3",
+    "prettysize": "0.0.3",
+    "run-parallel": "^1.0.0",
+    "stylus": "^0.48.1",
+    "webtorrent": "0.x"
+  },
+  "devDependencies": {
+    "browserify": "^5.10.0",
+    "nib": "^1.0.3",
+    "nodemon": "^1.2.1",
+    "stylus": "^0.48.0",
+    "watchify": "^1.0.1"
+  },
+  "homepage": "http://feross.org",
+  "keywords": [
+    "p2p",
+    "webrtc",
+    "data channel",
+    "file transfer"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/caktusgroup/sharptunes.git"
+  },
+  "scripts": {
+    "build": "mkdir -p static && npm run build-css && npm run build-js",
+    "build-css": "stylus -u nib css/main.styl -o static/ -c",
+    "build-js": "browserify client > static/bundle.js",
+    "start": "node server",
+    "watch": "npm run watch-css & npm run watch-js & DEBUG=webtorrent:* nodemon server -e js,jade -d 1",
+    "watch-css": "stylus -u nib css/main.styl -o static/ -w",
+    "watch-js": "watchify client -o static/bundle.js -dv"
+  }
+}

@@ -1,0 +1,55 @@
+@import 'nib'
+
+ellipsis()
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+
+.clearfix:before, .clearfix:after
+  content: ''
+  display: table
+
+.clearfix:after
+  clear: both
+
+.drag-layer
+  display: none
+  position: fixed
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  background: rgba(0,0,0,0.5)
+  body.drag &
+    display: block
+
+*, *:after, *:before
+  box-sizing: border-box
+
+html
+  margin: 0
+  padding: 0
+  height: 100%
+
+body
+  margin: 0
+  padding: 20px
+  min-height: 100%
+  font-size: 20px
+  font-family: sans-serif
+
+.drag
+  background: rgba(255, 0, 0, 0.3)
+  border: 5px red dashed
+
+label
+  margin-right: 10px
+input, button
+  font-size: 20px
+
+.log p
+  margin: 0
+
+footer
+  font-size: 0.8em
+  margin-top: 30px
