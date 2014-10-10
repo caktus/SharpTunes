@@ -37,6 +37,9 @@ module.exports.alphabetizePlaylist = function() {
 
 module.exports.next = function() {
     position ++
+    if (position === playlist.length) {
+        position = 0;
+    }
     module.exports.playCurrent()
 }
 
