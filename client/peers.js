@@ -59,21 +59,6 @@ function onMessage (peer, data) {
         // data.hzxhdx.forEach(function(infoHash) {
         //     download(infoHash)
         // })
-    } else if (data.type == 'player') {
-        switch (data.action) {
-            case "play":
-                Player.play()
-                break;
-            case "pause":
-                Player.pause()
-                break;
-            case "change":
-                console.log("change", data)
-                break;
-            default:
-                console.error("unknown player event: " + data.action)
-                break;
-        }
     } else {
         var callbacks = messageCallbacks[data.type]
         if (callbacks) {

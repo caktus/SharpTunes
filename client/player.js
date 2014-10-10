@@ -17,6 +17,23 @@ $player.addEventListener('ended', function() {
     Player.emit('trackend')
 })
 
+Peers.on("player", function(msg) {
+    switch (msg.action) {
+        case "play":
+            Player.play()
+            break;
+        case "pause":
+            Player.pause()
+            break;
+        case "change":
+            console.log("change", msg)
+            break;
+        default:
+            console.error("unknown player event: " + msg.action)
+            break;
+    }
+})
+
 var Player = module.exports = {
     setAudio: function(file) {
         file.createReadStream().pipe(concat(function (buf) {
