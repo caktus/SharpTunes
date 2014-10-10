@@ -25,6 +25,8 @@ var Library = module.exports = {
             resp.rows.forEach(function(row) {
                 if (row.key._attachments) {
                     Library.emit('readyfile', row.id)
+                } else {
+                    Library.db.remove(row.id)
                 }
             })
         })
@@ -36,7 +38,6 @@ var Library = module.exports = {
         }, onTorrent)
     },
     save: function(file, options) {
-        console.log("need to save", file)
         var options = options||{}
         var track = {
             _id: file.name,
@@ -44,14 +45,20 @@ var Library = module.exports = {
             type: file.type,
             owned: options.owned||false,
         }
-        this.db.put(track, function(err, r){
+        this.db.get(file.name, function(err, r) {
             if (err) {
-                console.error(err)
+                this.db.put(track, storeFile)
             } else {
-                console.log(r)
-                Library.db.putAttachment(track._id, "file", r.rev, new Blob([file.buffer]), file.type, function(err, r){
-                    console.log(err, r)
-                })
+                storeFile(err, r)
+            }
+            function storeFile(err, r){
+                if (err) {
+                    console.error(err)
+                } else {
+                    Library.db.putAttachment(r._id, "file", r._rev, new Blob([file.buffer]), file.type, function(err, r){
+                        console.log(err, r)
+                    })
+                }
             }
         })
     },
@@ -99,7 +106,8 @@ function onTorrent(torrent) {
         })
 
         torrent.files.forEach(function (file) {
-            Library.emit('newtrack', file)
+            // Library.emit('newtrack', file)
+            Library.save(file, {owned: false})
         })
     }
 }

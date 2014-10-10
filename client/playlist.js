@@ -36,7 +36,7 @@ var Playlist = module.exports = {
 
     alphabetizePlaylist: function() {
         playlist.sort(function(a, b) {
-            return a.file.name > b.file.name;
+            return a.title > b.title;
         })
     },
 
