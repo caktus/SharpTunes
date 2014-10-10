@@ -1,7 +1,14 @@
 var Player = require('./player')
+var Peers = require('./peers')
 var $playlist = document.querySelector('.playlist')
 
+var playlist = []
+var position = 0
+
 module.exports.addTrack = function(opt) {
+    playlist.push(opt)
+    var i = playlist.length - 1
+
     var $li = document.createElement('li')
     $li.innerText = opt.title
     $playlist.appendChild($li)
@@ -11,8 +18,33 @@ module.exports.addTrack = function(opt) {
     $a.addEventListener('click', function(){
         Player.setAudio(opt.file);
         setTimeout(function(){
-            Player.play();
+            module.exports.play(i);
         }, 500)
     })
     $li.appendChild($a)
 }
+
+module.exports.next = function() {
+    position ++
+    module.exports.playCurrent()
+}
+
+module.exports.playCurrent = function() {
+    module.exports.play(position)
+}
+
+module.exports.play = function(trackNumber) {
+    var track = playlist[trackNumber]
+    Player.setAudio(track.file)
+    Peers.broadcast({type: "trackChange", trackNumber: trackNumber})
+    setTimeout(function(){
+        Player.play()
+    }, 500)
+}
+
+Peers.on("trackChange", function(data) {
+    if (data.trackNumber !== position || Player.isPaused()) {
+        position = data.trackNumber
+        module.exports.playCurrent()
+    }
+})
