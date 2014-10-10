@@ -1,6 +1,9 @@
 var Client = require('bittorrent-client')
 var events = require('events')
 
+var PouchDB = require('pouchdb')
+window.PouchDB = PouchDB
+
 var dragDrop = require('drag-drop/buffer')
 // TODO: this seems out of place
 dragDrop('body', function (files) {
