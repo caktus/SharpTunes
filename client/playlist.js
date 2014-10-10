@@ -10,12 +10,18 @@ var Playlist = module.exports = {
     addTrack: function(opt) {
         playlist.push(opt)
         module.exports.alphabetizePlaylist()
-        var i = playlist.length - 1
+        this.redrawPlaylist()
+    },
 
+    redrawPlaylist: function() {
+        console.log(playlist)
         $playlist.innerText = ""
 
-        playlist.forEach(function(entry) {
+        playlist.forEach(function(entry, i) {
             var $li = document.createElement('li')
+            if (i === position) {
+                $li.classList.add('current')
+            }
             $li.innerText = entry.title
             $playlist.appendChild($li)
 
@@ -25,6 +31,7 @@ var Playlist = module.exports = {
                 Player.setAudio(entry.file);
                 setTimeout(function(){
                     module.exports.play(module.exports.getFilePosition(entry.file.name));
+                    Playlist.redrawPlaylist()
                 }, 500)
             })
             $li.appendChild($a)
@@ -64,13 +71,23 @@ var Playlist = module.exports = {
         setTimeout(function(){
             Player.play()
         }, 500)
+
+        this.redrawPlaylist()
     },
 }
+
+document.querySelector('#mute').addEventListener('click', function() {
+    var audio = document.querySelector('audio')
+    audio.muted = !audio.muted
+    var mute = document.querySelector('#mute')
+    mute.innerText = mute.innerText == 'Mute' ? 'Unmute' : 'Mute'
+})
 
 Peers.on("trackChange", function(data) {
     if (data.trackNumber !== position || Player.isPaused()) {
         position = data.trackNumber
         module.exports.playCurrent()
+        Playlist.redrawPlaylist()
     }
 })
 

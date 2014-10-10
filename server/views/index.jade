@@ -3,7 +3,9 @@ extends layout
 block body
   img(src="/SharpTunes.png")
   h2 Play Music
-  audio(id=player controls)
+  div
+    audio(id=player)
+    button#mute Mute
   h3 Playlist
   .peers
   .playlist
