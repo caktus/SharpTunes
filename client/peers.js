@@ -1,9 +1,12 @@
 var Tracker = require('webtorrent-tracker')
 var Client = require('bittorrent-client')
 var hat = require('hat')
+var concat = require('concat-stream')
 var dragDrop = require('drag-drop/buffer')
 dragDrop('body', function (files) {
-    client.seed(files, onTorrent)
+    files.forEach(function(file){
+        client.seed([file], onTorrent)
+    })
 })
 
 var Playlist = require('./playlist')
@@ -11,6 +14,7 @@ var Player = require('./player')
 
 // WebTorrent
 
+var torrents = {}
 var peers = []
 var peerId = new Buffer(hat(160), 'hex')
 var client = new Client({ peerId: peerId })
@@ -23,6 +27,23 @@ tracker.start();
 tracker.on('peer', function (peer) {
     peers.push(peer)
     peer.send({ type: "welcome" })
+    for (var hash in torrents) {
+        var torrent = torrents[hash];
+        var files = [];
+        torrent.files.forEach(function(file) {
+            file.createReadStream().pipe(concat(function (buf) {
+                var f = {
+                    buffer: buf,
+                    lastModifiedDate: new Date(),
+                    name: file.name,
+                    size: file.length,
+                    type: "audio/mp3",
+                }
+                client.seed([f], onTorrent)
+            }))
+
+        })
+    }
     peer.on('message', onMessage.bind(undefined, peer))
 
     function onClose () {
@@ -41,23 +62,28 @@ function download(infoHash) {
 }
 
 function onTorrent(torrent) {
-    broadcast({type: "newfile", infoHash: torrent.infoHash})
+    if (torrent.infoHash in torrents) {
+        broadcast({type: "existingfile", infoHash: torrent.infoHash})
+    } else {
+        torrents[torrent.infoHash] = torrent;
+        broadcast({type: "newfile", infoHash: torrent.infoHash})
 
-    torrent.swarm.on('download', function () {
-        var progress = (100 * torrent.downloaded / torrent.parsedTorrent.length).toFixed(1)
-        // logReplace('progress: ' + progress + '% -- download speed: ' + prettysize(torrent.swarm.downloadSpeed()) + '/s<br>')
-    })
-
-    torrent.swarm.on('upload', function () {
-        // logReplace('upload speed:' + prettysize(client.uploadSpeed()) + '/s<br>')
-    })
-
-    torrent.files.forEach(function (file) {
-        Playlist.addTrack({
-            title: file.name,
-            file: file,
+        torrent.swarm.on('download', function () {
+            var progress = (100 * torrent.downloaded / torrent.parsedTorrent.length).toFixed(1)
+            // logReplace('progress: ' + progress + '% -- download speed: ' + prettysize(torrent.swarm.downloadSpeed()) + '/s<br>')
         })
-    })
+
+        torrent.swarm.on('upload', function () {
+            // logReplace('upload speed:' + prettysize(client.uploadSpeed()) + '/s<br>')
+        })
+
+        torrent.files.forEach(function (file) {
+            Playlist.addTrack({
+                title: file.name,
+                file: file,
+            })
+        })
+    }
 }
 
 function onMessage (peer, data) {
@@ -68,10 +94,12 @@ function onMessage (peer, data) {
 
     if (data.type == 'newfile') {
         download(data.infoHash);
+    } else if (data.type == 'existingfile') {
+        download(data.infoHash);
     } else if (data.type === 'welcome') {
-        data.torrents.forEach(function(infoHash) {
-            download(infoHash)
-        })
+        // data.hzxhdx.forEach(function(infoHash) {
+        //     download(infoHash)
+        // })
     } else if (data.type == 'player') {
         switch (data.action) {
             case "play":
@@ -102,6 +130,11 @@ function broadcast (obj) {
     peers.forEach(function (peer) {
         peer.send(obj)
     })
+}
+
+module.exports.seedAllFiles = function() {
+    var allFiles = Playlist.getAllFiles()
+    client.seed(allFiles, onTorrent)
 }
 
 module.exports.broadcast = broadcast

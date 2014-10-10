@@ -29,6 +29,14 @@ module.exports.next = function() {
     module.exports.playCurrent()
 }
 
+module.exports.getFilePosition = function(filename) {
+    for (var i=0; i < playlist.length; i++) {
+        if (playlist[i].file.name === filename) {
+            return i
+        }
+    }
+}
+
 module.exports.playCurrent = function() {
     module.exports.play(position)
 }
