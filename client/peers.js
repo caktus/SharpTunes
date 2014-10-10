@@ -44,7 +44,6 @@ tracker.on('peer', function (peer) {
         peers.splice(peers.indexOf(peer), 1)
         UI.$peerCount.innerText = peers.length
     }
-
     peer.on('close', onClose)
     peer.on('error', onClose)
 })

@@ -31,17 +31,17 @@ var Library = module.exports = {
         this._client.seed(allFiles, onTorrent)
     },
 
+    _client: null,
+    _tracks: {},
+    _torrents: [],
+
+    _ee: new events.EventEmitter(),
     on: function() {
         this._ee.on.apply(this, arguments)
     },
     emit: function() {
         this._ee.emit.apply(this, arguments)
     },
-
-    _client: null,
-    _tracks: {},
-    _torrents: [],
-    _ee: new events.EventEmitter(),
 }
 
 function onShareTrack(msg) {

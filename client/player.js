@@ -1,4 +1,5 @@
 var concat = require('concat-stream')
+var events = require('events')
 
 var Peers = require('./peers')
 var Playlist = require('./playlist')
@@ -13,23 +14,33 @@ $player.addEventListener('pause', function() {
 })
 $player.addEventListener('ended', function() {
     Peers.broadcast({type: 'player', action: 'ended'})
-    Playlist.next()
+    Player.emit('trackend')
 })
 
-module.exports.setAudio = function(file) {
-    file.createReadStream().pipe(concat(function (buf) {
-        $player.src = URL.createObjectURL(new Blob([ buf ]))
-    }))
-}
+var Player = module.exports = {
+    setAudio: function(file) {
+        file.createReadStream().pipe(concat(function (buf) {
+            $player.src = URL.createObjectURL(new Blob([ buf ]))
+        }))
+    },
 
-module.exports.play = function() {
-    $player.play()
-}
+    play: function() {
+        $player.play()
+    },
 
-module.exports.pause = function() {
-    $player.pause()
-}
+    pause: function() {
+        $player.pause()
+    },
 
-module.exports.isPaused = function() {
-    return $player.paused
+    isPaused: function() {
+        return $player.paused
+    },
+
+    _ee: new events.EventEmitter(),
+    on: function() {
+        this._ee.on.apply(this, arguments)
+    },
+    emit: function() {
+        this._ee.emit.apply(this, arguments)
+    },
 }

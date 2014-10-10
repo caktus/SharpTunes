@@ -80,3 +80,7 @@ Library.on("newtrack", function(track) {
         file: track,
     })
 })
+
+Player.on('trackend', function() {
+    Playlist.next()
+})
