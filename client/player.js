@@ -2,7 +2,7 @@ var concat = require('concat-stream')
 var events = require('events')
 
 var Peers = require('./peers')
-var Playlist = require('./playlist')
+var Library = require('./library')
 
 var $player = document.querySelector('audio')
 
@@ -16,6 +16,13 @@ var Player = module.exports = {
         file.createReadStream().pipe(concat(function (buf) {
             $player.src = URL.createObjectURL(new Blob([ buf ]))
         }))
+    },
+
+    playTrack: function(trackId) {
+        Library.readTrackFile(trackId, function(err, buf) {
+            $player.src = URL.createObjectURL(new Blob([ buf ]))
+            Player.play();
+        })
     },
 
     play: function() {

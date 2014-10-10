@@ -27,11 +27,8 @@ var Playlist = module.exports = {
             var $a = document.createElement('a')
             $a.innerText = " [play]"
             $a.addEventListener('click', function(){
-                Player.setAudio(entry.file);
-                setTimeout(function(){
-                    module.exports.play(module.exports.getFilePosition(entry.file.name));
-                    Playlist.redrawPlaylist()
-                }, 500)
+                Player.playTrack(entry.id);
+                Playlist.redrawPlaylist()
             })
             $li.appendChild($a)
         })
@@ -93,7 +90,15 @@ Peers.on("trackChange", function(data) {
 Library.on("newtrack", function(track) {
     Playlist.addTrack({
         title: track.name,
-        file: track,
+        // file: track,
+    })
+})
+
+Library.on("readyfile", function(trackId) {
+    Playlist.addTrack({
+        id: trackId,
+        title: trackId,
+        // file: track,
     })
 })
 

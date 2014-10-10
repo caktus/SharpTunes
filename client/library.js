@@ -2,13 +2,14 @@ var Client = require('bittorrent-client')
 var events = require('events')
 
 var PouchDB = require('pouchdb')
-window.PouchDB = PouchDB
+window.PouchDB = PouchDB // TODO for testing
 
 var dragDrop = require('drag-drop/buffer')
 // TODO: this seems out of place
 dragDrop('body', function (files) {
     files.forEach(function(file){
         Library._client.seed([file], onTorrent)
+        Library.save(file, {own: true})
     })
 })
 
@@ -19,6 +20,14 @@ var Library = module.exports = {
     init: function() {
         this._client = new Client({ peerId: Peers.peerId })
         Peers.on('sharetrack', onShareTrack)
+        this.db = new PouchDB('SharpTunesLibrary')
+        this.db.query({map: function(doc){emit(doc)}}, {}, function(err, resp) {
+            resp.rows.forEach(function(row) {
+                if (row.key._attachments) {
+                    Library.emit('readyfile', row.id)
+                }
+            })
+        })
     },
     download: function(infoHash) {
         this._client.add({
@@ -26,6 +35,32 @@ var Library = module.exports = {
             announce: [ 'wss://tracker.webtorrent.io' ]
         }, onTorrent)
     },
+    save: function(file, options) {
+        console.log("need to save", file)
+        var options = options||{}
+        var track = {
+            _id: file.name,
+            title: file.name,
+            type: file.type,
+            owned: options.owned||false,
+        }
+        this.db.put(track, function(err, r){
+            if (err) {
+                console.error(err)
+            } else {
+                console.log(r)
+                Library.db.putAttachment(track._id, "file", r.rev, new Blob([file.buffer]), file.type, function(err, r){
+                    console.log(err, r)
+                })
+            }
+        })
+    },
+    readTrackFile: function(trackId, cb) {
+        this.db.getAttachment(trackId, "file", function(err, buffer) {
+            cb(err, buffer)
+        })
+    },
+
     seedFile: function(f) {
         this._client.seed([f], onTorrent)
     },
