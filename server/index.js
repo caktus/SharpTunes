@@ -20,6 +20,18 @@ var httpsServer = https.createServer({
 
 util.upgradeLimits()
 
+// PeerJS
+// var PeerServer = require('peer').PeerServer
+// var peerJSServer = new PeerServer({port: 9105, path: '/sharptunes'})
+// var connected = [];
+// peerJSServer.on('connect', function (id) {
+//   connected.push(id);
+//   console.log(id, "join")
+// });
+// peerJSServer.on('disconnect', function (id) {
+//   connected.remove(connected.indexOf(id));
+// });
+
 // Templating
 app.set('views', __dirname + '/views')
 app.set('view engine', 'jade')

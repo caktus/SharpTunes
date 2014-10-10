@@ -1,4 +1,3 @@
-var Client = require('bittorrent-client')
 var events = require('events')
 
 var PouchDB = require('pouchdb')
@@ -8,7 +7,6 @@ var dragDrop = require('drag-drop/buffer')
 // TODO: this seems out of place
 dragDrop('body', function (files) {
     files.forEach(function(file){
-        Library._client.seed([file], onTorrent)
         Library.save(file, {own: true})
     })
 })
@@ -18,7 +16,6 @@ var Playlist = require('./playlist')
 
 var Library = module.exports = {
     init: function() {
-        this._client = new Client({ peerId: Peers.peerId })
         Peers.on('sharetrack', onShareTrack)
         this.db = new PouchDB('SharpTunesLibrary')
         this.db.query({map: function(doc){emit(doc)}}, {}, function(err, resp) {
@@ -31,12 +28,7 @@ var Library = module.exports = {
             })
         })
     },
-    download: function(infoHash) {
-        this._client.add({
-            infoHash: infoHash,
-            announce: [ 'wss://tracker.webtorrent.io' ]
-        }, onTorrent)
-    },
+
     save: function(file, options) {
         var options = options||{}
         var track = {
@@ -47,7 +39,7 @@ var Library = module.exports = {
         }
         this.db.get(file.name, function(err, r) {
             if (err) {
-                this.db.put(track, storeFile)
+                Library.db.put(track, storeFile)
             } else {
                 storeFile(err, r)
             }
@@ -68,18 +60,6 @@ var Library = module.exports = {
         })
     },
 
-    seedFile: function(f) {
-        this._client.seed([f], onTorrent)
-    },
-    seedAllFiles: function() {
-        var allFiles = Playlist.getAllFiles()
-        this._client.seed(allFiles, onTorrent)
-    },
-
-    _client: null,
-    _tracks: {},
-    _torrents: [],
-
     _ee: new events.EventEmitter(),
     on: function() {
         this._ee.on.apply(this, arguments)
@@ -90,24 +70,5 @@ var Library = module.exports = {
 }
 
 function onShareTrack(msg) {
-    Library.download(msg.infoHash);
-}
 
-function onTorrent(torrent) {
-    if (torrent.infoHash in Library._torrents) {
-        Peers.broadcast({type: "sharetrack", infoHash: torrent.infoHash})
-    } else {
-        Library._torrents[torrent.infoHash] = torrent;
-        Peers.broadcast({type: "sharetrack", infoHash: torrent.infoHash})
-
-        torrent.swarm.on('download', function () {
-            var progress = (100 * torrent.downloaded / torrent.parsedTorrent.length).toFixed(1)
-            console.log(torrent.infoHash, progress)
-        })
-
-        torrent.files.forEach(function (file) {
-            // Library.emit('newtrack', file)
-            Library.save(file, {owned: false})
-        })
-    }
 }
