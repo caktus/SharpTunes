@@ -59,8 +59,8 @@ function onTorrent(torrent) {
         Peers.broadcast({type: "sharetrack", infoHash: torrent.infoHash})
 
         torrent.swarm.on('download', function () {
-            var progress = (100 * torrent.downloaded / torrent.parsedTorrent.length).toFixed(1)
-            console.log(torrent.infoHash, progress)
+            // var progress = (100 * torrent.downloaded / torrent.parsedTorrent.length).toFixed(1)
+            // console.log(torrent.infoHash, progress)
         })
 
         torrent.files.forEach(function (file) {
